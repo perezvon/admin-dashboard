@@ -3,6 +3,17 @@ import './App.css';
 import Papa from 'papaparse'
 import {FileUploader} from './FileUploader'
 import {Dashboard} from './Dashboard'
+import * as csv from './SalesOrderReport.csv'
+
+const data = Papa.parse(csv, {
+  header: true,
+  complete: function(results) {
+    this.setState({
+      data: results.data
+    })
+  }.bind(this)
+});
+console.log(data);
 
 class App extends React.Component {
   constructor(props) {
@@ -10,10 +21,8 @@ class App extends React.Component {
     this.state = {
       company: '[Company Name]'
     };
-    //won't let me use arrow syntax for function declaration -- why?
-    this.handleUpload = this.handleUpload.bind(this);
   }
-  handleUpload() {
+  handleUpload = () => {
     let file = document.getElementById('fileUpload').files[0];
     Papa.parse(file, {
       header: true,
