@@ -50,10 +50,11 @@ export const Dashboard = ({data, maxSpend}) => {
         }
       })
 
-
-
       //format user spend data for chart
       pieData = userTotals.map(item => {return {'label': item.name,'value': (item.amount / total * 100).toFixed(2)}})
+
+      //sort user spend data for display
+      userTotals = _.sortBy(userTotals, 'amount').reverse();
       //update UI
       totalSpend = <h2>Total Spend 2017: <span className='green-text'>${total.toFixed(2)}</span></h2>
       userData = userTotals.map((user, index) => {
