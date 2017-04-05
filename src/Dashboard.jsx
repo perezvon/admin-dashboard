@@ -6,7 +6,7 @@ import {Table} from './Table'
 
 let PieChart = rd3.PieChart;
 
-export const Dashboard = ({data, companyName, totalSpend, userData, pieData}) => (
+export const Dashboard = ({data, companyName, totalSpend, userData, pieData, headers, tableData}) => (
       <div>
           <div className='row'>
            <div className='col-md-12'>
@@ -32,7 +32,7 @@ export const Dashboard = ({data, companyName, totalSpend, userData, pieData}) =>
                 />
               </div>
             </div>
-           <Table data={data} />
+           <Table headers={headers} tableData={tableData} />
             </div>
            }
       </div>

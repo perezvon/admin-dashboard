@@ -45,6 +45,8 @@ class App extends React.Component {
     let total = 0;
     let totalSpend = '';
     let userData = '';
+    let tableData;
+    let headers = [];
     if (data) {
       data = data.filter(item => !!item.textBox14);
       //set company name
@@ -94,13 +96,32 @@ class App extends React.Component {
         const textColor = user.amount <= this.state.maxSpend ? 'green-text' : 'red-text';
         return <h3 key={index}>{user.name}: <span className={textColor}>${user.amount.toFixed(2)}</span></h3>
       })
+
+      //extract header titles for table
+      for (let i = 1; i <= 13; i++) {
+        let box = 'textBox' + i;
+        headers.push(data[0][box]);
+      }
+      headers = headers.map((item, index) => {
+        return <th key={index}>{item}</th>
+      })
+
+      //get data for table
+      tableData = data.map(item => {
+        let tempValues = [];
+        for (let i = 14; i <= 26; i++) {
+          let box = 'textBox' + i;
+          tempValues.push(item[box]);
+        }
+        return <tr>{tempValues.map(val=>{return <td>{val}</td>})}</tr>
+      })
     }
     return (
       <div className='container-fluid'>
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard data={data} companyName={companyName} totalSpend={totalSpend} userData={userData} pieData={pieData} />
+      <Dashboard data={data} companyName={companyName} totalSpend={totalSpend} userData={userData} pieData={pieData} headers={headers} tableData={tableData}/>
         </div>
     )
   }
