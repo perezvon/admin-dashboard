@@ -12,23 +12,25 @@ export const Dashboard = ({data, maxSpend}) => {
     let companyName = 'upload a csv file...';
     let total = 0;
     let totalSpend = '';
-    let userTotals = [],
-      userData = '';
+    let userData = '';
     if (data) {
       //set company name
       companyName = data[0].textBox30;
 
       //get unique users and total the spend of each
       const uniqueUsers = [...new Set(data.map(item => item.textBox16))];
+      let userTotals = [];
+      if (!_.last(uniqueUsers)) uniqueUsers.pop();
       uniqueUsers.forEach(user => {
-        let currentTotal = 0;
         for (let i = 0; i < data.length; i++) {
-          if (user && user === data[i].textBox16) currentTotal += currToNumber(data[i].textBox23);
+          if (user === data[i].textBox16 && !_.find(userTotals, u => u.name === user)) {
+            const currentTotal = currToNumber(data[i].textBox26);
+            userTotals.push({
+              name: user,
+              amount: currentTotal
+            })
+          }
         }
-        if (user) userTotals.push({
-          name: user,
-          amount: currentTotal
-        });
       });
 
       //get unique orders && totals for each
@@ -40,8 +42,8 @@ export const Dashboard = ({data, maxSpend}) => {
           if (order === data[i].textBox14 && !_.find(orderTotals, o => o.order === order )) {
             const orderTotal = currToNumber(data[i].textBox26);
             orderTotals.push({
-              'order': order,
-              'total': orderTotal
+              order: order,
+              total: orderTotal
             })
             total += orderTotal
           }
