@@ -2,12 +2,12 @@ import React from 'react';
 import rd3 from 'react-d3';
 import './Dashboard.css';
 import {currToNumber} from './global'
-//import {UserSpendPie} from './UserSpendPie'
 import {Table} from './Table'
+import _ from 'underscore'
 
 let PieChart = rd3.PieChart;
 
-export const Dashboard = ({data}) => {
+export const Dashboard = ({data, maxSpend}) => {
     let pieData = []
     let companyName = 'upload a csv file...';
     let total = 0;
@@ -17,12 +17,7 @@ export const Dashboard = ({data}) => {
     if (data) {
       //set company name
       companyName = data[0].textBox30;
-      //calc total spend
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].textBox30 === companyName) {
-          total += currToNumber(data[i].textBox23);
-        }
-      }
+
       //get unique users and total the spend of each
       const uniqueUsers = [...new Set(data.map(item => item.textBox16))];
       uniqueUsers.forEach(user => {
@@ -35,12 +30,34 @@ export const Dashboard = ({data}) => {
           amount: currentTotal
         });
       });
+
+      //get unique orders && totals for each
+      const uniqueOrders = [...new Set(data.map(item => item.textBox14))];
+      let orderTotals = [];
+      if (!_.last(uniqueOrders)) uniqueOrders.pop();
+      uniqueOrders.forEach(order => {
+        for (let i = 0; i < data.length; i++) {
+          if (order === data[i].textBox14 && !_.find(orderTotals, o => o.order === order )) {
+            const orderTotal = currToNumber(data[i].textBox26);
+            orderTotals.push({
+              'order': order,
+              'total': orderTotal
+            })
+            total += orderTotal
+          }
+        }
+      })
+
+
+
       //format user spend data for chart
       pieData = userTotals.map(item => {return {'label': item.name,'value': (item.amount / total * 100).toFixed(2)}})
-      console.log(pieData);
       //update UI
       totalSpend = <h2>Total Spend 2017: <span className='green-text'>${total.toFixed(2)}</span></h2>
-      userData = userTotals.map((user, index) => <h3 key={index}>{user.name}: <span className='green-text'>${user.amount.toFixed(2)}</span></h3>)
+      userData = userTotals.map((user, index) => {
+        const textColor = user.amount <= maxSpend ? 'green-text' : 'red-text';
+        return <h3 key={index}>{user.name}: <span className={textColor}>${user.amount.toFixed(2)}</span></h3>
+      })
     }
     return (
       <div>

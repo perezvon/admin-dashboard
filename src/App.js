@@ -10,7 +10,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      company: '[Company Name]'
+      company: '[Company Name]',
+      maxSpend: 500
     };
   }
   handleUpload = () => {
@@ -30,7 +31,6 @@ class App extends React.Component {
       download: true,
       header: true,
       complete: function(results) {
-        console.log(results.data);
         this.setState({
           data: results.data
         })
@@ -43,7 +43,7 @@ class App extends React.Component {
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard company={this.state.company} data={this.state.data}/>
+      <Dashboard company={this.state.company} data={this.state.data} maxSpend={this.state.maxSpend}/>
         </div>
     )
   }
