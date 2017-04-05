@@ -3,17 +3,8 @@ import './App.css';
 import Papa from 'papaparse'
 import {FileUploader} from './FileUploader'
 import {Dashboard} from './Dashboard'
-import * as csv from './SalesOrderReport.csv'
 
-const data = Papa.parse(csv, {
-  header: true,
-  complete: function(results) {
-    this.setState({
-      data: results.data
-    })
-  }.bind(this)
-});
-console.log(data);
+const csv = 'sampledata.csv'
 
 class App extends React.Component {
   constructor(props) {
@@ -27,6 +18,19 @@ class App extends React.Component {
     Papa.parse(file, {
       header: true,
       complete: function(results) {
+        this.setState({
+          data: results.data
+        })
+      }.bind(this)
+    });
+  }
+
+  componentDidMount = () => {
+    Papa.parse(csv, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        console.log(results.data);
         this.setState({
           data: results.data
         })
