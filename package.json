@@ -5,10 +5,12 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "d3": "^4.7.4",
+    "events": "^1.1.1",
     "papaparse": "^4.2.0",
     "react": "^15.4.2",
     "react-d3": "^0.4.0",
     "react-dom": "^15.4.2",
+    "recharts": "^0.22.0",
     "underscore": "^1.8.3"
   },
   "devDependencies": {

@@ -11,7 +11,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      maxSpend: 500
+      maxSpend: 500,
+      logo: 'moorheadlogo.png'
     };
   }
   handleUpload = () => {
@@ -122,7 +123,7 @@ class App extends React.Component {
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard companyName={companyName} totalSpend={totalSpend} userData={userData} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData}/>
+      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} userData={userData} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData}/>
         </div>
     )
   }
