@@ -1,19 +1,16 @@
 import React from 'react';
-import rd3 from 'react-d3';
 import './Dashboard.css';
 import {Table} from './Table'
+import {UserSpendChart} from './UserSpendChart'
 
-
-let PieChart = rd3.PieChart;
-
-export const Dashboard = ({data, companyName, totalSpend, userData, pieData, headers, tableData}) => (
+export const Dashboard = ({companyName, totalSpend, userData, chartData, tooltipContent, headers, tableData}) => (
       <div>
           <div className='row'>
            <div className='col-md-12'>
           <h1>{companyName}</h1>
             </div>
           </div>
-          {data &&
+          {userData &&
             <div>
             <div className='row'>
               <div className='col-md-6'>
@@ -21,18 +18,10 @@ export const Dashboard = ({data, companyName, totalSpend, userData, pieData, hea
                 {userData}
                 </div>
               <div className='col-md-6'>
-                <PieChart
-                  data={pieData}
-                  width={400}
-                  height={400}
-                  radius={100}
-                  innerRadius={20}
-                  sectorBorderColor="white"
-                  title="User Spend"
-                />
+                <UserSpendChart chartData={chartData} />
               </div>
             </div>
-           <Table headers={headers} tableData={tableData} />
+           <Table headers={headers} tableData={tableData} tooltipContent={tooltipContent} />
             </div>
            }
       </div>

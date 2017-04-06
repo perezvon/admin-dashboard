@@ -40,7 +40,8 @@ class App extends React.Component {
 
   render() {
     let data = this.state.data;
-    let pieData = []
+    let chartData = []
+    let tooltipContent;
     let companyName = 'upload a csv file...';
     let total = 0;
     let totalSpend = '';
@@ -85,11 +86,11 @@ class App extends React.Component {
         }
       })
 
-      //format user spend data for chart
-      pieData = userTotals.map(item => {return {'label': item.name,'value': (item.amount / total * 100).toFixed(2)}})
-
       //sort user spend data for display
       userTotals = _.sortBy(userTotals, 'amount').reverse();
+      //format user spend data for chart
+      chartData = userTotals.map(item => {return {'name': item.name,'total': item.amount}})
+      tooltipContent = chartData.map(item => {return {'name': item.name,'total': '$' + item.amount}})
       //update UI
       totalSpend = <h2>Total Spend 2017: <span className='green-text'>${total.toFixed(2)}</span></h2>
       userData = userTotals.map((user, index) => {
@@ -121,7 +122,7 @@ class App extends React.Component {
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard data={data} companyName={companyName} totalSpend={totalSpend} userData={userData} pieData={pieData} headers={headers} tableData={tableData}/>
+      <Dashboard companyName={companyName} totalSpend={totalSpend} userData={userData} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData}/>
         </div>
     )
   }
