@@ -7,11 +7,6 @@
   color: red;
 }
 
-.arc text {
-  font: 10px sans-serif;
-  text-anchor: middle;
-}
-
-.arc path {
-  stroke: #fff;
+.table:hover {
+  cursor: pointer;
 }
