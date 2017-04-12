@@ -72,6 +72,7 @@ class App extends React.Component {
   }
 
   componentWillMount = () => {
+    this.setState({referrer: document.referrer})
     /*
     //currently obtaining token through fetch call does not work. Obtaining token through cURL until I figure this out.
     fetch(url, {
@@ -236,6 +237,8 @@ class App extends React.Component {
         return <tr><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
       })
     }
+
+    console.log(this.state.referrer)
     return (
       <div className='container-fluid'>
         {! this.state.data &&
