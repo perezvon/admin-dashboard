@@ -3,9 +3,9 @@ import './Dashboard.css';
 import {Table} from './Table'
 import {UserSpendChart} from './UserSpendChart'
 import {Logo} from './Logo'
-import {OrderDetails} from './OrderDetails'
+import {DetailModal} from './DetailModal'
 
-export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, orderNumber, orderData, showModal, openModal, closeModal}) => (
+export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, userHeaders, userSpendData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, modalTitle, modalData, showModal, openModal, closeModal}) => (
       <div>
           <div className='row'>
            <div className='col-md-12'>
@@ -23,11 +23,14 @@ export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userDa
                 {productsPurchased}
                 </div>
               <div className='col-md-6'>
-                <UserSpendChart chartData={chartData} />
+                <UserSpendChart chartData={chartData} tooltipContent={tooltipContent} />
               </div>
             </div>
-           <Table headers={headers} tableData={tableData} tooltipContent={tooltipContent} />
-           <OrderDetails orderNumber={orderNumber} orderData={orderData} showModal={showModal} openModal={openModal} closeModal={closeModal} />
+            <div className='col-md-6'>
+            <Table headers={userHeaders} tableData={userSpendData} />
+            </div>
+           <Table headers={headers} tableData={tableData} />
+           <DetailModal modalTitle={modalTitle} modalData={modalData} showModal={showModal} openModal={openModal} closeModal={closeModal} />
             </div>
            }
       </div>

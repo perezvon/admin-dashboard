@@ -16,7 +16,8 @@ class App extends React.Component {
       maxSpend: 500,
       logo: 'moorheadlogo.png',
       showModal: false,
-      activeOrder: 0
+      activeOrder: 0,
+      acviteUser: ''
     };
   }
   handleUpload = () => {
@@ -42,6 +43,17 @@ class App extends React.Component {
     const order = e.target.parentNode.attributes.getNamedItem('data-order').value;
     this.setState({
       activeOrder: order,
+      activeUser: '',
+      showModal: true
+    })
+  }
+
+  setActiveUser = (e) => {
+    e.preventDefault();
+    const user = e.target.parentNode.attributes.getNamedItem('data-user').value;
+    this.setState({
+      activeUser: user,
+      activeOrder: 0,
       showModal: true
     })
   }
@@ -125,14 +137,16 @@ class App extends React.Component {
     let companyTotal = 0;
     let totalSpend = '';
     let userData = '';
+    let userHeaders, userSpendData;
     let totalOrders = '';
+    let totalProductCount = 0;
     let productsPurchased = '';
     let orderTotals = [];
     let tableData;
     let headers = [];
     let totalSpendRemaining = 0;
     let spendRemaining;
-    let orderData;
+    let modalData, modalTitle, orderData, userOrderData;
 
     if (data) {
       data = data.filter(item => !!item.textBox14);
@@ -166,10 +180,16 @@ class App extends React.Component {
         }
       });
 
-      //format user orders for table
+      //format user orders for order table
       headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
       tableData = userTotals.map((item, index) => {
         return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i && key !== 'orderNumber' ? '$'+i.toFixed(2) : i}</td>)}</tr>
+      })
+
+      //format users for user spend table
+      userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
+      userSpendData = _.uniq(userTotals, 'name').map((item, index) => {
+        return <tr key={item.name} data-user={item.name} onClick={this.setActiveUser}>{_.map(item, (i, key) => {return key === 'name' ? <td key={i}>{i}</td> : null})}</tr>
       })
 
       //get unique orders && totals for each
@@ -195,13 +215,14 @@ class App extends React.Component {
       totalOrders = <h3>Number of Orders: <span className='green-text'>{orderTotals.length}</span></h3>
 
       //total products purchased
-      productsPurchased = <h3>Total Products Purchased: <span className='green-text'>{data.length}</span> </h3>
+      totalProductCount = data.map(i => i.textBox22).reduce((a,b) => +a + +b);
+      productsPurchased = <h3>Total Products Purchased: <span className='green-text'>{totalProductCount}</span> </h3>
 
       //sort user spend data for display
       userTotals = _.sortBy(userTotals, 'total').reverse();
       //format user spend data for chart
       chartData = userTotals.map(user => {return {'name': user.name,'total': user.total}})
-      tooltipContent = chartData.map(item => {return {'name': item.name,'total': '$' + item.total}})
+      tooltipContent = chartData.map(item => {return {'name': item.name,'total': '$' + item.total.toFixed(2)}})
       //update UI
       totalSpend = <h2>Total Spend 2017: <span className='green-text'>${companyTotal.toFixed(2)}</span></h2>
       spendRemaining = <h2>Amount Remaining 2017: <span className='green-text'>${totalSpendRemaining.toFixed(2)}</span></h2>
@@ -233,18 +254,27 @@ class App extends React.Component {
       //get data for current order
       orderData = data.filter(item => {
         return item.textBox14 === this.state.activeOrder
-      }).map(item => {
-        return <tr><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
+      }).map((item, index) => {
+        return <tr key={index}><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
       })
+
+      userOrderData = data.filter(item => {
+        return item.textBox16 === this.state.activeUser
+      }).map((item, index) => {
+        return <tr key={index}><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
+      })
+
+      modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
+      modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Orders for ' + this.state.activeUser;
+
     }
 
-    console.log(this.state.referrer)
     return (
       <div className='container-fluid'>
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} spendRemaining={spendRemaining} userData={userData} totalOrders={totalOrders} productsPurchased={productsPurchased} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData} orderNumber={this.state.activeOrder} orderData={orderData} showModal={this.state.showModal} openModal={this.openModal} closeModal={this.closeModal} />
+      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} spendRemaining={spendRemaining} userData={userData} userHeaders={userHeaders} userSpendData={userSpendData} totalOrders={totalOrders} productsPurchased={productsPurchased} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData} modalTitle={modalTitle} modalData={modalData} showModal={this.state.showModal} openModal={this.openModal} closeModal={this.closeModal} />
         </div>
     )
   }

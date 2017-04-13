@@ -7,7 +7,7 @@ export const UserSpendChart = ({chartData, tooltipContent}) => (
        <XAxis dataKey="name"/>
        <YAxis/>
        <CartesianGrid strokeDasharray="3 3"/>
-       <Tooltip content={tooltipContent}/>
+       <Tooltip />
        <Bar dataKey="total" fill={"green"} isAnimationActive={false} />
       </BarChart>
     );
