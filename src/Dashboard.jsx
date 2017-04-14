@@ -5,7 +5,7 @@ import {UserSpendChart} from './UserSpendChart'
 import {Logo} from './Logo'
 import {DetailModal} from './DetailModal'
 
-export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, userHeaders, userSpendData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, modalTitle, modalData, showModal, openModal, closeModal}) => (
+export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, userHeaders, userSpendData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, modalTitle, modalData, userDetails, showModal, openModal, closeModal}) => (
       <div>
           <div className='row'>
            <div className='col-md-12'>
@@ -30,7 +30,7 @@ export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userDa
             <Table headers={userHeaders} tableData={userSpendData} />
             </div>
            <Table headers={headers} tableData={tableData} />
-           <DetailModal modalTitle={modalTitle} modalData={modalData} showModal={showModal} openModal={openModal} closeModal={closeModal} />
+           <DetailModal modalTitle={modalTitle} modalData={modalData} userDetails={userDetails} showModal={showModal} openModal={openModal} closeModal={closeModal} />
             </div>
            }
       </div>

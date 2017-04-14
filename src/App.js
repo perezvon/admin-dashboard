@@ -15,6 +15,7 @@ class App extends React.Component {
     this.state = {
       maxSpend: 500,
       logo: 'moorheadlogo.png',
+      companyName: 'Moorhead Fire',
       showModal: false,
       activeOrder: 0,
       acviteUser: ''
@@ -147,60 +148,34 @@ class App extends React.Component {
     let totalSpendRemaining = 0;
     let spendRemaining;
     let modalData, modalTitle, orderData, userOrderData;
+    let userTotals = [];
+    let userDetails = [];
 
     if (data) {
-      data = data.filter(item => !!item.textBox14);
+      data = data.filter(item => !!item.textBox14).filter(item => item.textBox30 === this.state.companyName);
       //set company name
-      companyName = data[0].textBox30 ? data[0].textBox30 : '[Company Name]';
-
-      //get unique users && create dataset for each
-      const uniqueUsers = [...new Set(data.map(item => item.textBox16))];
-      let userTotals = [];
-      if (!_.last(uniqueUsers)) uniqueUsers.pop();
-      totalSpendRemaining = this.state.maxSpend * uniqueUsers.length;
-      uniqueUsers.forEach(user => {
-        for (let i = 0; i < data.length; i++) {
-          if (user === data[i].textBox16 && !_.find(userTotals, u => u.name === user)) {
-            const currentTotal = +currToNumber(data[i].textBox26);
-            const orderNumber = data[i].textBox14;
-            const orderDate = data[i].textBox15;
-            const shipping = +currToNumber(data[i].textBox24);
-            const tax = +currToNumber(data[i].textBox25);
-            const subtotal = +(currentTotal - shipping - tax);
-            userTotals.push({
-              orderNumber: orderNumber,
-              date: moment(orderDate).format('MMMM D, YYYY'),
-              name: user,
-              subtotal: subtotal,
-              shipping: shipping,
-              tax: tax,
-              total: currentTotal
-            })
-          }
-        }
-      });
-
-      //format user orders for order table
-      headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
-      tableData = userTotals.map((item, index) => {
-        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i && key !== 'orderNumber' ? '$'+i.toFixed(2) : i}</td>)}</tr>
-      })
-
-      //format users for user spend table
-      userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
-      userSpendData = _.uniq(userTotals, 'name').map((item, index) => {
-        return <tr key={item.name} data-user={item.name} onClick={this.setActiveUser}>{_.map(item, (i, key) => {return key === 'name' ? <td key={i}>{i}</td> : null})}</tr>
-      })
+      companyName = this.state.companyName;
 
       //get unique orders && totals for each
       const uniqueOrders = [...new Set(data.map(item => item.textBox14))];
       if (!_.last(uniqueOrders)) uniqueOrders.pop();
       uniqueOrders.forEach(order => {
         for (let i = 0; i < data.length; i++) {
-          if (order === data[i].textBox14 && !_.find(orderTotals, o => o.order === order )) {
+          if (order === data[i].textBox14 && !_.find(orderTotals, o => o.orderNumber === order )) {
             const orderTotal = currToNumber(data[i].textBox26);
+            const orderNumber = data[i].textBox14;
+            const orderDate = data[i].textBox15;
+            const name = data[i].textBox16;
+            const shipping = +currToNumber(data[i].textBox24);
+            const tax = +currToNumber(data[i].textBox25);
+            const subtotal = +(orderTotal - shipping - tax);
             orderTotals.push({
-              order: order,
+              orderNumber: orderNumber,
+              date: moment(orderDate).format('MMMM D, YYYY'),
+              name: name,
+              subtotal: subtotal,
+              shipping: shipping,
+              tax: tax,
               total: orderTotal
             })
             companyTotal += orderTotal
@@ -208,8 +183,44 @@ class App extends React.Component {
         }
       })
 
-      //total spend reamaining == num of users * each user's allotment - total already spent by users
-      totalSpendRemaining -= companyTotal;
+      //get unique users && create dataset for each
+      const uniqueUsers = [...new Set(data.map(item => item.textBox16))];
+      if (!_.last(uniqueUsers)) uniqueUsers.pop();
+
+      totalSpendRemaining = this.state.maxSpend * uniqueUsers.length;
+
+      uniqueUsers.forEach(user => {
+        let currentTotal = 0;
+        let numOfOrders = 0;
+        for (let i = 0; i < orderTotals.length; i++) {
+          if (user === orderTotals[i].name) {
+            numOfOrders++;
+            currentTotal += orderTotals[i].total;
+          }
+        }
+
+        currentTotal > this.state.maxSpend ? currentTotal = this.state.maxSpend : null;
+        totalSpendRemaining -= currentTotal;
+
+        userTotals.push({
+          name: user,
+          orders: numOfOrders,
+          total: currentTotal,
+          spendRemaining: this.state.maxSpend - currentTotal
+        })
+      });
+
+      //format orders for order table
+      headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
+      tableData = orderTotals.map((item, index) => {
+        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i && key !== 'orderNumber' ? '$'+i.toFixed(2) : i}</td>)}</tr>
+      })
+
+      //format users for user spend table
+      userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
+      userSpendData = _.uniq(orderTotals, 'name').map((item, index) => {
+        return <tr key={item.name} data-user={item.name} onClick={this.setActiveUser}>{_.map(item, (i, key) => {return key === 'name' ? <td key={i}>{i}</td> : null})}</tr>
+      })
 
       //number of orders
       totalOrders = <h3>Number of Orders: <span className='green-text'>{orderTotals.length}</span></h3>
@@ -263,9 +274,10 @@ class App extends React.Component {
       }).map((item, index) => {
         return <tr key={index}><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
       })
+      userDetails = _.first(userTotals.filter(item => item.name === this.state.activeUser));
 
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
-      modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Orders for ' + this.state.activeUser;
+      modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Shopper Profile for ' + this.state.activeUser;
 
     }
 
@@ -274,7 +286,7 @@ class App extends React.Component {
         {! this.state.data &&
     <FileUploader handleUpload={this.handleUpload}/>
           }
-      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} spendRemaining={spendRemaining} userData={userData} userHeaders={userHeaders} userSpendData={userSpendData} totalOrders={totalOrders} productsPurchased={productsPurchased} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData} modalTitle={modalTitle} modalData={modalData} showModal={this.state.showModal} openModal={this.openModal} closeModal={this.closeModal} />
+      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} spendRemaining={spendRemaining} userData={userData} userHeaders={userHeaders} userSpendData={userSpendData} totalOrders={totalOrders} productsPurchased={productsPurchased} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData} modalTitle={modalTitle} modalData={modalData} userDetails={userDetails} showModal={this.state.showModal} openModal={this.openModal} closeModal={this.closeModal} />
         </div>
     )
   }
