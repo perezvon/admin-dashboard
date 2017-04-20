@@ -4,7 +4,7 @@ import Papa from 'papaparse'
 import {FileUploader} from './FileUploader'
 import {Dashboard} from './Dashboard'
 import _ from 'underscore'
-import {currToNumber} from './global'
+import {currToNumber, sortCollection} from './global'
 import moment from 'moment'
 
 const csv = 'sampledata.csv'
@@ -18,7 +18,8 @@ class App extends React.Component {
       companyName: 'Moorhead Fire',
       showModal: false,
       activeOrder: 0,
-      acviteUser: ''
+      activeUser: '',
+      reverse: true
     };
   }
   handleUpload = () => {
@@ -59,18 +60,63 @@ class App extends React.Component {
     })
   }
 
-  sortTable = (e) => {
+  sortFactor = (e) => {
     e.preventDefault();
     const sort = e.target.attributes.getNamedItem('data-sort').value;
-    console.log(sort)
+    let reverseValue = this.state.reverse;
     switch (sort) {
+      case 'Order Number':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'orderNumber',
+          reverse: !reverseValue
+        })
+      break;
       case 'Order Date':
         this.setState({
-          sort: 'orderDate'
+          lastSort: this.state.sort,
+          sort: 'date',
+          reverse: !reverseValue
+        })
+      break;
+      case 'Employee Name':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'name',
+          reverse: !reverseValue
+        })
+      break;
+      case 'Subtotal':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'subtotal',
+          reverse: !reverseValue
+        })
+      break;
+      case 'Tax':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'tax',
+          reverse: !reverseValue
+        })
+      break;
+      case 'Total':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'total',
+          reverse: !reverseValue
+        })
+      break;
+      case 'Shipping':
+        this.setState({
+          lastSort: this.state.sort,
+          sort: 'shipping',
+          reverse: !reverseValue
         })
       break;
       default:
         this.setState({
+          lastSort: this.state.sort,
           sort: ''
         })
     }
@@ -178,7 +224,6 @@ class App extends React.Component {
               tax: tax,
               total: orderTotal
             })
-            companyTotal += orderTotal
           }
         }
       })
@@ -199,7 +244,8 @@ class App extends React.Component {
           }
         }
 
-        currentTotal > this.state.maxSpend ? currentTotal = this.state.maxSpend : null;
+        if (currentTotal > this.state.maxSpend) currentTotal = this.state.maxSpend;
+        companyTotal += currentTotal;
         totalSpendRemaining -= currentTotal;
 
         userTotals.push({
@@ -210,14 +256,15 @@ class App extends React.Component {
         })
       });
 
+      let sortedOrders = sortCollection(orderTotals, this.state.sort, this.state.reverse);
+
       //format orders for order table
-      headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
-      tableData = orderTotals.map((item, index) => {
+      headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
+      tableData = sortedOrders.map((item, index) => {
         return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i && key !== 'orderNumber' ? '$'+i.toFixed(2) : i}</td>)}</tr>
       })
-
       //format users for user spend table
-      userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortTable}>{item}</th>);
+      userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
       userSpendData = _.uniq(orderTotals, 'name').map((item, index) => {
         return <tr key={item.name} data-user={item.name} onClick={this.setActiveUser}>{_.map(item, (i, key) => {return key === 'name' ? <td key={i}>{i}</td> : null})}</tr>
       })
@@ -241,26 +288,6 @@ class App extends React.Component {
         const textColor = user.total <= this.state.maxSpend ? 'green-text' : 'red-text';
         return <h3 key={index}>{user.name}: <span className={textColor}>${user.total.toFixed(2)}</span></h3>
       })
-
-/*
-      //extract header titles for table
-      for (let i = 1; i <= 13; i++) {
-        let box = 'textBox' + i;
-        headers.push(data[0][box]);
-      }
-      headers = headers.map((item, index) => {
-        return <th key={index}>{item}</th>
-      })
-
-      //get data for table
-      tableData = data.map(item => {
-        let tempValues = [];
-        for (let i = 14; i <= 26; i++) {
-          let box = 'textBox' + i;
-          tempValues.push(item[box]);
-        }
-        return <tr>{tempValues.map(val=>{return <td>{val}</td>})}</tr>
-      })*/
 
       //get data for current order
       orderData = data.filter(item => {

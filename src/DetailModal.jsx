@@ -4,9 +4,9 @@ import Button from 'react-bootstrap/lib/Button';
 import {UserDetails} from './UserDetails';
 
 export const DetailModal = ({modalTitle, modalData, showModal, openModal, closeModal, userDetails}) => (
-  <Modal show={showModal} onHide={closeModal} bsSize="large" aria-labelledby="contained-modal-title-lg">
+  <Modal show={showModal} onHide={closeModal} bsSize='large' aria-labelledby='contained-modal-title-lg'>
           <Modal.Header closeButton>
-            <Modal.Title id="contained-modal-title-lg">{modalTitle}</Modal.Title>
+            <Modal.Title id='contained-modal-title-lg' className='h2'>{modalTitle}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {userDetails &&
