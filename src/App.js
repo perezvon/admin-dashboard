@@ -142,6 +142,8 @@ class App extends React.Component {
     headers.append('PrivateKey', privateKey);
     headers.append('Token', accessToken);
     headers.append('cache-control', 'no-cache');
+    console.log(headers.get('PrivateKey'))
+    console.log(headers.get('Token'))
     let myInit = {
       method: 'GET',
       credentials: 'include',
