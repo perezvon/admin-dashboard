@@ -141,8 +141,10 @@ class App extends React.Component {
     headers.append('SecureUrl', 'https://717418968211.3dcart.net');
     headers.append('PrivateKey', privateKey);
     headers.append('Token', accessToken);
+    headers.append('cache-control', 'no-cache');
     let myInit = {
       method: 'GET',
+      credentials: 'include',
       headers: headers
     };
     fetch(url, myInit)
