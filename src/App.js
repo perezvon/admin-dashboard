@@ -131,27 +131,17 @@ class App extends React.Component {
   }
 
   componentWillMount = () => {
-    this.setState({referrer: document.referrer})
-    /*
-    //currently obtaining token through fetch call does not work. Obtaining token through cURL until I figure this out.
-    fetch(url, {
-   method: 'post',
-   headers: {
-     'Authorization': 'Basic '+btoa('q7IqO96zO06o61OK/QfRlw:ab149daa-1784-4aa5-8180-209e4912dcb9'),
-     'Content-Type': 'application/x-www-form-urlencoded'
-   },
-   body: 'A=1&B=2'
- })
-  .then(res => {
-    console.log(res)
-  });
-    const url = 'https://api.sellerscommerce.com/api/order/getall';
-    const accessToken = 'T4PYUUtbz5XokxhHuUR7sFfnTBrOV9vGqW7Yn61TlrW0Ju0pTj_TAshnxV5aKPdBF3o25ESdDYbb8Ilj-uJM4xDQViucIAqYpM5iIYoUkm9pzkmq1WOzyDLuPqMQzW4ekpLwPLmz8eTdFOwcvCIuorft5waVVc1Y8iy6hWlLUl-h5K1iVpCvYM4N74oJGwoR0HyJS_mgEehda34BPu3xPGLpGfg';
+    //fetch call is giving 400 status, can't figure out why -- fallback to csv report
+    const url = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Customers';
+    const accessToken = process.env.ACCESS_TOKEN;
+    const privateKey = process.env.PRIVATE_KEY;
     let headers = new Headers();
     headers.append('Accept', 'application/json');
-    headers.append('Content-Type', 'application/json')
-    headers.append('Authorization', 'Bearer ' + accessToken);
-    const myInit = {
+    headers.append('Content-Type', 'application/json;charset=UTF-8')
+    headers.append('SecureUrl', 'https://717418968211.3dcart.net');
+    headers.append('PrivateKey', privateKey);
+    headers.append('Token', accessToken);
+    let myInit = {
       method: 'GET',
       headers: headers
     };
@@ -160,20 +150,25 @@ class App extends React.Component {
         if (res.ok) return res.json();
       })
       .then(json => {
-        const currentData = json.Results//.filter(x => !!x.OrderNumber);
+        console.log(json)
+        const currentData = json//.Results//.filter(x => !!x.OrderNumber);
         this.setData(currentData);
-      })*/
+      })
+      .catch(err => {
+        console.log(err)
+        Papa.parse(csv, {
+          download: true,
+          header: true,
+          complete: function(results) {
+            this.setState({
+              data: results.data
+            })
+          }.bind(this)
+        });
+      })
 
 
-    Papa.parse(csv, {
-      download: true,
-      header: true,
-      complete: function(results) {
-        this.setState({
-          data: results.data
-        })
-      }.bind(this)
-    });
+
   }
 
   render() {
