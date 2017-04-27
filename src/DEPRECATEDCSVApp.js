@@ -4,7 +4,7 @@ import Papa from 'papaparse'
 import {FileUploader} from './FileUploader'
 import {Dashboard} from './Dashboard'
 import _ from 'underscore'
-import {sortCollection} from './global'
+import {currToNumber, sortCollection} from './global'
 import moment from 'moment'
 const customerFile = 'customers.json'
 const orderFile = 'orders.json'
@@ -165,17 +165,13 @@ class App extends React.Component {
         fetch(customerFile)
           .then(res => res.json())
           .then(json => {
-            let groupCustomers = json.filter(item=>item.CustomerGroupID === this.state.CustomerGroupID)
-            let customerIDs = groupCustomers.map(item=>item.CustomerID)
-            this.setState({
-              customersArray: groupCustomers,
-              customerIDs: customerIDs
-            });
+            let groupCustomers = json.filter(item=>item.CustomerGroupID === this.state.CustomerGroupID).map(item=>item.CustomerID)
+            this.setState({customersArray: groupCustomers});
           });
         fetch(orderFile)
           .then(res => res.json())
           .then(json => {
-            let orderData = json.filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+            let orderData = json.filter(item => this.state.customersArray.indexOf(item.CustomerID) !== -1)
             this.setData(orderData)
           })
         /*Papa.parse(csv, {
@@ -194,7 +190,9 @@ class App extends React.Component {
   }
 
   render() {
+    console.log(this.state.customersArray)
     let data = this.state.data;
+    console.log(data);
     let chartData = []
     let tooltipContent;
     let companyName = 'upload a csv file...';
@@ -215,42 +213,49 @@ class App extends React.Component {
     let userDetails = [];
 
     if (data) {
+      data = data.filter(item => !!item.textBox14).filter(item => item.textBox30 === this.state.companyName);
       //set company name
-      companyName = data[0].BillingCompany;
+      companyName = this.state.companyName;
 
-      //populate orders array
-      data.forEach(i => {
-        let orderNumber = i.InvoiceNumberPrefix + i.InvoiceNumber;
-        let date = moment(i.OrderDate).format('MMMM DD, YYYY');
-        let username = i.BillingFirstName + ' ' + i.BillingLastName;
-        let shipping = i.ShipmentList[0].ShipmentCost;
-        let tax = i.SalesTax;
-        let total = i.OrderAmount;
-        let subtotal = total - shipping - tax;
-        orderTotals.push({
-          orderNumber: orderNumber,
-          date:date,
-          name: username,
-          subtotal: subtotal,
-          shipping: shipping,
-          tax: tax,
-          total: total
-        })
-      });
+      //get unique orders && totals for each
+      const uniqueOrders = [...new Set(data.map(item => item.textBox14))];
+      if (!_.last(uniqueOrders)) uniqueOrders.pop();
+      uniqueOrders.forEach(order => {
+        for (let i = 0; i < data.length; i++) {
+          if (order === data[i].textBox14 && !_.find(orderTotals, o => o.orderNumber === order )) {
+            const orderTotal = currToNumber(data[i].textBox26);
+            const orderNumber = data[i].textBox14;
+            const orderDate = data[i].textBox15;
+            const name = data[i].textBox16;
+            const shipping = +currToNumber(data[i].textBox24);
+            const tax = +currToNumber(data[i].textBox25);
+            const subtotal = +(orderTotal - shipping - tax);
+            orderTotals.push({
+              orderNumber: orderNumber,
+              date: moment(orderDate).format('MMMM D, YYYY'),
+              name: name,
+              subtotal: subtotal,
+              shipping: shipping,
+              tax: tax,
+              total: orderTotal
+            })
+          }
+        }
+      })
 
       //get unique users && create dataset for each
-      const uniqueUsers = [...new Set(data.map(item => item.CustomerID))];
+      const uniqueUsers = [...new Set(data.map(item => item.textBox16))];
+      if (!_.last(uniqueUsers)) uniqueUsers.pop();
 
       totalSpendRemaining = this.state.maxSpend * uniqueUsers.length;
 
       uniqueUsers.forEach(user => {
-        let userName = this.state.customersArray.filter(i => i.CustomerID === user).map(i=>i.BillingFirstName + ' ' + i.BillingLastName)[0]
         let currentTotal = 0;
         let numOfOrders = 0;
-        for (let i = 0; i < data.length; i++) {
-          if (user === data[i].CustomerID) {
+        for (let i = 0; i < orderTotals.length; i++) {
+          if (user === orderTotals[i].name) {
             numOfOrders++;
-            currentTotal += data[i].OrderAmount;
+            currentTotal += orderTotals[i].total;
           }
         }
 
@@ -259,7 +264,7 @@ class App extends React.Component {
         totalSpendRemaining -= currentTotal;
 
         userTotals.push({
-          name: userName,
+          name: user,
           orders: numOfOrders,
           total: currentTotal,
           spendRemaining: this.state.maxSpend - currentTotal
@@ -271,7 +276,7 @@ class App extends React.Component {
       //format orders for order table
       headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
       tableData = sortedOrders.map((item, index) => {
-        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i ? '$'+i.toFixed(2) : i}</td>)}</tr>
+        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i && key !== 'orderNumber' ? '$'+i.toFixed(2) : i}</td>)}</tr>
       })
       //format users for user spend table
       userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
@@ -280,10 +285,10 @@ class App extends React.Component {
       })
 
       //number of orders
-      totalOrders = <h3>Number of Orders: <span className='green-text'>{data.length}</span></h3>
+      totalOrders = <h3>Number of Orders: <span className='green-text'>{orderTotals.length}</span></h3>
 
       //total products purchased
-      totalProductCount = data.map(i => i.OrderItemList.length).reduce((a,b) => a + b);
+      totalProductCount = data.map(i => i.textBox22).reduce((a,b) => +a + +b);
       productsPurchased = <h3>Total Products Purchased: <span className='green-text'>{totalProductCount}</span> </h3>
 
       //sort user spend data for display
@@ -300,27 +305,17 @@ class App extends React.Component {
       })
 
       //get data for current order
-      if (this.state.activeOrder !== 0) {
-        orderData = data.filter(item => {
-          return item.InvoiceNumber === +this.state.activeOrder.slice(3,7);
-        }).map(item => item.OrderItemList[0])
-          .map((item, index) => {
-            //strip html and options from item description
-            let description = item.ItemDescription.split('<', 1)[0];
-          return <tr key={index}><td>{item.ItemID}</td><td>{description}</td><td>${item.ItemUnitPrice.toFixed(2)}</td><td>{item.ItemQuantity}</td><td>${(item.ItemUnitPrice * item.ItemQuantity).toFixed(2)}</td></tr>
-        })
-    }
+      orderData = data.filter(item => {
+        return item.textBox14 === this.state.activeOrder
+      }).map((item, index) => {
+        return <tr key={index}><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
+      })
 
-      //get data for current customer
-      if (this.state.activeUser) {
-        userOrderData = data.filter(item => {
-          return item.BillingFirstName + ' ' + item.BillingLastName === this.state.activeUser
-        }).map(item => item.OrderItemList[0])
-          .map((item, index) => {
-            let description = item.ItemDescription.split('<', 1)[0];
-            return <tr key={index}><td>{item.ItemID}</td><td>{description}</td><td>${item.ItemUnitPrice.toFixed(2)}</td><td>{item.ItemQuantity}</td><td>${(item.ItemUnitPrice * item.ItemQuantity).toFixed(2)}</td></tr>
-          })
-    }
+      userOrderData = data.filter(item => {
+        return item.textBox16 === this.state.activeUser
+      }).map((item, index) => {
+        return <tr key={index}><td>{item.textBox19}</td><td>{item.textBox18}</td><td>{item.textBox21}</td><td>{item.textBox22}</td><td>{item.textBox23}</td></tr>
+      })
       userDetails = _.first(userTotals.filter(item => item.name === this.state.activeUser));
 
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
