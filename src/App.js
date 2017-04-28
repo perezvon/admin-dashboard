@@ -1,14 +1,12 @@
 import React from 'react';
 import './App.css';
-import Papa from 'papaparse'
-import {FileUploader} from './FileUploader'
 import {Dashboard} from './Dashboard'
 import _ from 'underscore'
 import {sortCollection} from './global'
 import moment from 'moment'
+
 const customerFile = 'customers.json'
 const orderFile = 'orders.json'
-//const csv = 'sampledata.csv'
 
 class App extends React.Component {
   constructor(props) {
@@ -24,17 +22,6 @@ class App extends React.Component {
       activeUser: '',
       reverse: true
     };
-  }
-  handleUpload = () => {
-    const file = document.getElementById('fileUpload').files[0];
-    Papa.parse(file, {
-      header: true,
-      complete: function(results) {
-        this.setState({
-          data: results.data
-        })
-      }.bind(this)
-    });
   }
 
   setData = (data) => {
@@ -135,12 +122,12 @@ class App extends React.Component {
 
   componentWillMount = () => {
     const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Orders';
-    const accessToken = process.env.TOKEN ? process.env.TOKEN : '87dcb88f1619747fd8398aa6731cac15';
-    const privateKey = process.env.KEY ? process.env.KEY : 'be6a6060c5b8d34baff6fef2d5902529';
+    const accessToken = process.env.TOKEN;
+    const privateKey = process.env.KEY;
     let headers = new Headers();
     headers.append('Accept', 'application/json');
     headers.append('Content-Type', 'application/x-www-form-urlencoded')
-    headers.append('SecureUrl', 'https://717418968211.3dcart.net');
+    headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
     headers.append('PrivateKey', privateKey);
     headers.append('Token', accessToken);
     headers.append('cache-control', 'no-cache');
@@ -178,15 +165,6 @@ class App extends React.Component {
             let orderData = json.filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
             this.setData(orderData)
           })
-        /*Papa.parse(csv, {
-          download: true,
-          header: true,
-          complete: function(results) {
-            this.setState({
-              data: results.data
-            })
-          }.bind(this)
-        });*/
       })
 
 
@@ -197,7 +175,7 @@ class App extends React.Component {
     let data = this.state.data;
     let chartData = []
     let tooltipContent;
-    let companyName = 'upload a csv file...';
+    let companyName = '[Company Name]';
     let companyTotal = 0;
     let totalSpend = '';
     let userData = '';
@@ -214,7 +192,7 @@ class App extends React.Component {
     let userTotals = [];
     let userDetails = [];
 
-    if (data) {
+    if (data && data !== []) {
       //set company name
       companyName = data[0].BillingCompany;
 
@@ -330,11 +308,28 @@ class App extends React.Component {
 
     return (
       <div className='container-fluid'>
-        {! this.state.data &&
-    <FileUploader handleUpload={this.handleUpload}/>
-          }
-      <Dashboard logo={this.state.logo} companyName={companyName} totalSpend={totalSpend} spendRemaining={spendRemaining} userData={userData} userHeaders={userHeaders} userSpendData={userSpendData} totalOrders={totalOrders} productsPurchased={productsPurchased} chartData={chartData} tooltipContent={tooltipContent} headers={headers} tableData={tableData} modalTitle={modalTitle} modalData={modalData} userDetails={userDetails} showModal={this.state.showModal} openModal={this.openModal} closeModal={this.closeModal} />
-        </div>
+        <Dashboard
+          logo={this.state.logo}
+          companyName={companyName}
+          totalSpend={totalSpend}
+          spendRemaining={spendRemaining}
+          userData={userData}
+          userHeaders={userHeaders}
+          userSpendData={userSpendData}
+          totalOrders={totalOrders}
+          productsPurchased={productsPurchased}
+          chartData={chartData}
+          tooltipContent={tooltipContent}
+          headers={headers}
+          tableData={tableData}
+          modalTitle={modalTitle}
+          modalData={modalData}
+          userDetails={userDetails}
+          showModal={this.state.showModal}
+          openModal={this.openModal}
+          closeModal={this.closeModal}
+        />
+      </div>
     )
   }
 }
