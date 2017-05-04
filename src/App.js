@@ -121,7 +121,7 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-    const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Orders';
+    const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers';
     const accessToken = process.env.TOKEN || '956acc14d68e04e8cfddd611f07fbc6a';
     const privateKey = process.env.KEY || 'be6a6060c5b8d34baff6fef2d5902529';
     let headers = new Headers();
@@ -152,10 +152,9 @@ class App extends React.Component {
         fetch(customerFile)
           .then(res => res.json())
           .then(json => {
-            let groupCustomers = json.filter(item=>item.CustomerGroupID === this.state.CustomerGroupID)
-            let customerIDs = groupCustomers.map(item=>item.CustomerID)
+            let customerIDs = json.map(item=>item.CustomerID)
             this.setState({
-              customersArray: groupCustomers,
+              customersArray: json,
               customerIDs: customerIDs
             });
           });
@@ -193,8 +192,6 @@ class App extends React.Component {
     let userDetails = [];
 
     if (data) {
-      //set company name
-      companyName = data[0].BillingCompany;
 
       //populate orders array
       data.forEach(i => {
