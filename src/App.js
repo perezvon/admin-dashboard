@@ -120,13 +120,13 @@ class App extends React.Component {
     this.setState({showModal: false})
   }
 
-  componentWillMount = () => {
+  componentDidMount = () => {
     const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Orders';
-    const accessToken = process.env.TOKEN;
-    const privateKey = process.env.KEY;
+    const accessToken = process.env.TOKEN || '956acc14d68e04e8cfddd611f07fbc6a';
+    const privateKey = process.env.KEY || 'be6a6060c5b8d34baff6fef2d5902529';
     let headers = new Headers();
     headers.append('Accept', 'application/json');
-    headers.append('Content-Type', 'application/x-www-form-urlencoded')
+    headers.append('Content-Type', 'application/json;charset=UTF-8');
     headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
     headers.append('PrivateKey', privateKey);
     headers.append('Token', accessToken);
@@ -192,7 +192,7 @@ class App extends React.Component {
     let userTotals = [];
     let userDetails = [];
 
-    if (data && data !== []) {
+    if (data) {
       //set company name
       companyName = data[0].BillingCompany;
 
@@ -249,7 +249,7 @@ class App extends React.Component {
       //format orders for order table
       headers = ['Order Number', 'Order Date', 'Employee Name', 'Subtotal', 'Shipping', 'Tax', 'Total'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
       tableData = sortedOrders.map((item, index) => {
-        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={i}>{+i ? '$'+i.toFixed(2) : i}</td>)}</tr>
+        return <tr key={item.orderNumber} data-order={item.orderNumber} onClick={this.setActiveOrder}>{_.map(item, (i, key) => <td key={key}>{+i ? '$'+i.toFixed(2) : i}</td>)}</tr>
       })
       //format users for user spend table
       userHeaders = ['Name'].map((item, index) => <th key={index} data-sort={item} onClick={this.sortFactor}>{item}</th>);
