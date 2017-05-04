@@ -8,6 +8,7 @@ import moment from 'moment'
 
 const customerFile = 'customers.json'
 const orderFile = 'orders.json'
+console.log(process.env.REACT_APP_AUTH0_KEY)
 const lock = new Auth0Lock(
   process.env.REACT_APP_AUTH0_KEY,
   'perezvon.auth0.com',
