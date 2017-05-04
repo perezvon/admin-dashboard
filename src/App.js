@@ -152,7 +152,7 @@ class App extends React.Component {
         fetch(customerFile)
           .then(res => res.json())
           .then(json => {
-            let customerIDs = json.map(item=>item.CustomerID)
+            let customerIDs = json.map(item => item.CustomerID)
             this.setState({
               customersArray: json,
               customerIDs: customerIDs
