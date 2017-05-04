@@ -2,27 +2,54 @@ import React from 'react';
 import './App.css';
 import {Dashboard} from './Dashboard'
 import _ from 'underscore'
-import {sortCollection} from './global'
+import Auth0Lock from 'auth0-lock'
+import {sortCollection, getCompanyInfo, getCustomerGroupID} from './global'
 import moment from 'moment'
 
 const customerFile = 'customers.json'
 const orderFile = 'orders.json'
+const lock = new Auth0Lock(
+  process.env.REACT_APP_AUTH0_KEY,
+  'perezvon.auth0.com',
+  {
+    allowedConnections: ['Username-Password-Authentication'],
+    languageDictionary: {
+      usernameOrEmailInputPlaceholder: 'username',
+      title: 'Quartermaster Dashboard'
+    }
+  }
+);
+
+lock.on("authenticated", function(authResult) {
+  // Use the token in authResult to getUserInfo() and save it to localStorage
+  lock.getUserInfo(authResult.accessToken, (error, profile) => {
+    if (error) {
+      console.log(error)
+      return;
+    }
+    localStorage.setItem('accessToken', authResult.accessToken);
+    localStorage.setItem('username', profile.username);
+  });
+});
+
+const token = localStorage.getItem('accessToken');
+console.log(token)
+const username = localStorage.getItem('username');
+console.log(username)
+const currentId = getCustomerGroupID(username);
+console.log(currentId)
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      //need to set first four params dynamically based on logged-in user's group
-      maxSpend: 500,
-      logo: 'moorheadlogo.png',
-      companyName: 'Moorhead Fire',
-      CustomerGroupID: 1,
       showModal: false,
       activeOrder: 0,
       activeUser: '',
-      reverse: true
+      reverse: true,
+      CustomerGroupID: currentId
     };
-  }
+}
 
   setData = (data) => {
     this.setState({
@@ -121,71 +148,75 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-    const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
-    const ordersUrl = 'https://apirest.3dcart.com/#dCartWebAPI/v1/Orders?limit=300';
-    const accessToken = process.env.REACT_APP_TOKEN;
-    const privateKey = process.env.REACT_APP_KEY;
-    let headers = new Headers();
-    headers.append('Host', 'apirest.3dcart.com');
-    headers.append('Accept', 'application/json');
-    headers.append('Content-Type', 'application/json;charset=UTF-8');
-    headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
-    headers.append('PrivateKey', privateKey);
-    headers.append('Token', accessToken);
-    headers.append('cache-control', 'no-cache');
-    console.log(headers.get('PrivateKey'))
-    console.log(headers.get('Token'))
-    let myInit = {
-      method: 'GET',
-      credentials: 'include',
-      headers: headers,
-      mode: 'cors'
-    };
+    if (token && this.state.CustomerGroupID) {
+      const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
+      const ordersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Orders?limit=300';
+      const accessToken = process.env.REACT_APP_TOKEN;
+      const privateKey = process.env.REACT_APP_KEY;
+      let headers = new Headers();
+      headers.append('Host', 'apirest.3dcart.com');
+      headers.append('Accept', 'application/json');
+      headers.append('Content-Type', 'application/json;charset=UTF-8');
+      headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
+      headers.append('PrivateKey', privateKey);
+      headers.append('Token', accessToken);
+      headers.append('cache-control', 'no-cache');
+      let myInit = {
+        method: 'GET',
+        credentials: 'include',
+        headers: headers,
+        mode: 'cors'
+      };
 
-    const customerRequest = new Request(customersUrl, myInit);
-    fetch(customerRequest)
-      .then(res => {
-        if (res.ok) return res.json();
-      })
-      .then(json => {
-        let customerIDs = json.map(item => item.CustomerID)
-        this.setState({
-          customersArray: json,
-          customerIDs: customerIDs
-        });
-      })
-      .then(() => {
-        fetch(ordersUrl)
-          .then(res => res.json())
-          .then(json => {
-            let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
-            this.setData(orderData)
-          })
-      })
-      .catch(err => {
-        console.log(err)
-        fetch(customerFile)
-          .then(res => res.json())
-          .then(json => {
-            let customerIDs = json.map(item => item.CustomerID)
-            this.setState({
-              customersArray: json,
-              customerIDs: customerIDs
-            });
+      const customerRequest = new Request(customersUrl, myInit);
+      const ordersRequest = new Request(ordersUrl, myInit);
+      fetch(customerRequest)
+        .then(res => {
+          if (res.ok) return res.json();
+        })
+        .then(json => {
+          let customerIDs = json.map(item => item.CustomerID)
+          this.setState({
+            customersArray: json,
+            customerIDs: customerIDs
           });
-        fetch(orderFile)
-          .then(res => res.json())
-          .then(json => {
-            let orderData = json.filter(item => item.OrderStatusID !== 7)
-            this.setData(orderData)
-          })
-      })
-
+          this.setState(getCompanyInfo(this.state.CustomerGroupID))
+        })
+        .then(() => {
+          fetch(ordersRequest)
+            .then(res => res.json())
+            .then(json => {
+              let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+              this.setData(orderData)
+            })
+        })
+        /*.catch(err => {
+          console.log(err)
+          fetch(customerFile)
+            .then(res => res.json())
+            .then(json => {
+              let customerIDs = json.map(item => item.CustomerID)
+              this.setState({
+                customersArray: json,
+                customerIDs: customerIDs
+              });
+              this.setState(getCompanyInfo(this.state.CustomerGroupID))
+            });
+          fetch(orderFile)
+            .then(res => res.json())
+            .then(json => {
+              let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+              this.setData(orderData)
+            })
+        })*/
+      }
 
 
   }
 
   render() {
+    if (token) {
+      console.log(this.state.CustomerGroupID)
     let data = this.state.data;
     let chartData = []
     let tooltipContent;
@@ -206,7 +237,7 @@ class App extends React.Component {
     let userTotals = [];
     let userDetails = [];
 
-    if (data) {
+    if (data && data !== []) {
 
       //populate orders array
       data.forEach(i => {
@@ -343,7 +374,10 @@ class App extends React.Component {
         />
       </div>
     )
+  } else {
+    lock.show()
   }
+}
 }
 
 export default App;
