@@ -121,10 +121,12 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-    const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers';
-    const accessToken = process.env.TOKEN || '956acc14d68e04e8cfddd611f07fbc6a';
-    const privateKey = process.env.KEY || 'be6a6060c5b8d34baff6fef2d5902529';
+    const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
+    const ordersUrl = 'https://apirest.3dcart.com/#dCartWebAPI/v1/Orders?limit=300';
+    const accessToken = process.env.REACT_APP_TOKEN;
+    const privateKey = process.env.REACT_APP_KEY;
     let headers = new Headers();
+    headers.append('Host', 'apirest.3dcart.com');
     headers.append('Accept', 'application/json');
     headers.append('Content-Type', 'application/json;charset=UTF-8');
     headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
@@ -137,15 +139,28 @@ class App extends React.Component {
       method: 'GET',
       credentials: 'include',
       headers: headers,
+      mode: 'cors'
     };
-    fetch(customersUrl, myInit)
+
+    const customerRequest = new Request(customersUrl, myInit);
+    fetch(customerRequest)
       .then(res => {
         if (res.ok) return res.json();
       })
       .then(json => {
-        return json.filter(item=>item.CustomerGroupID === this.state.CustomerGroupID)
+        let customerIDs = json.map(item => item.CustomerID)
+        this.setState({
+          customersArray: json,
+          customerIDs: customerIDs
+        });
       })
-      .then(groupCustomers => {
+      .then(() => {
+        fetch(ordersUrl)
+          .then(res => res.json())
+          .then(json => {
+            let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+            this.setData(orderData)
+          })
       })
       .catch(err => {
         console.log(err)
@@ -161,7 +176,7 @@ class App extends React.Component {
         fetch(orderFile)
           .then(res => res.json())
           .then(json => {
-            let orderData = json.filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+            let orderData = json.filter(item => item.OrderStatusID !== 7)
             this.setData(orderData)
           })
       })
@@ -174,7 +189,7 @@ class App extends React.Component {
     let data = this.state.data;
     let chartData = []
     let tooltipContent;
-    let companyName = '[Company Name]';
+    let companyName = this.state.companyName;
     let companyTotal = 0;
     let totalSpend = '';
     let userData = '';
@@ -258,7 +273,7 @@ class App extends React.Component {
       totalOrders = <h3>Number of Orders: <span className='green-text'>{data.length}</span></h3>
 
       //total products purchased
-      totalProductCount = data.map(i => i.OrderItemList.length).reduce((a,b) => a + b);
+      totalProductCount = _.flatten(data.map(i => i.OrderItemList)).map(i => i.ItemQuantity).reduce((a,b) => a + b);
       productsPurchased = <h3>Total Products Purchased: <span className='green-text'>{totalProductCount}</span> </h3>
 
       //sort user spend data for display
@@ -278,8 +293,8 @@ class App extends React.Component {
       if (this.state.activeOrder !== 0) {
         orderData = data.filter(item => {
           return item.InvoiceNumber === +this.state.activeOrder.slice(3,7);
-        }).map(item => item.OrderItemList[0])
-          .map((item, index) => {
+        }).map(item => item.OrderItemList)
+          orderData = _.flatten(orderData).map((item, index) => {
             //strip html and options from item description
             let description = item.ItemDescription.split('<', 1)[0];
           return <tr key={index}><td>{item.ItemID}</td><td>{description}</td><td>${item.ItemUnitPrice.toFixed(2)}</td><td>{item.ItemQuantity}</td><td>${(item.ItemUnitPrice * item.ItemQuantity).toFixed(2)}</td></tr>
@@ -290,8 +305,8 @@ class App extends React.Component {
       if (this.state.activeUser) {
         userOrderData = data.filter(item => {
           return item.BillingFirstName + ' ' + item.BillingLastName === this.state.activeUser
-        }).map(item => item.OrderItemList[0])
-          .map((item, index) => {
+        }).map(item => item.OrderItemList)
+          userOrderData = _.flatten(userOrderData).map((item, index) => {
             let description = item.ItemDescription.split('<', 1)[0];
             return <tr key={index}><td>{item.ItemID}</td><td>{description}</td><td>${item.ItemUnitPrice.toFixed(2)}</td><td>{item.ItemQuantity}</td><td>${(item.ItemUnitPrice * item.ItemQuantity).toFixed(2)}</td></tr>
           })

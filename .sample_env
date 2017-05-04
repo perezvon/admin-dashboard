@@ -1,2 +1,2 @@
-KEY=fakeKey
-TOKEN=falseToken
+REACT_APP_KEY=fakeKey
+REACT_APP_TOKEN=falseToken
