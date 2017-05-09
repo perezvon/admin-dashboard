@@ -8,7 +8,6 @@ import moment from 'moment'
 
 const customerFile = 'customers.json'
 const orderFile = 'orders.json'
-console.log(process.env.REACT_APP_AUTH0_KEY)
 const lock = new Auth0Lock(
   process.env.REACT_APP_AUTH0_KEY,
   'perezvon.auth0.com',
@@ -34,11 +33,8 @@ lock.on("authenticated", function(authResult) {
 });
 
 const token = localStorage.getItem('accessToken');
-console.log(token)
 const username = localStorage.getItem('username');
-console.log(username)
 const currentId = getCustomerGroupID(username);
-console.log(currentId)
 
 class App extends React.Component {
   constructor(props) {
@@ -191,7 +187,7 @@ class App extends React.Component {
               this.setData(orderData)
             })
         })
-        /*.catch(err => {
+        .catch(err => {
           console.log(err)
           fetch(customerFile)
             .then(res => res.json())
@@ -209,7 +205,7 @@ class App extends React.Component {
               let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
               this.setData(orderData)
             })
-        })*/
+        })
       }
 
 
