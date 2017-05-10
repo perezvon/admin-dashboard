@@ -6,8 +6,6 @@ import Auth0Lock from 'auth0-lock'
 import {sortCollection, getCompanyInfo, getCustomerGroupID} from './global'
 import moment from 'moment'
 
-const customerFile = 'customers.json'
-const orderFile = 'orders.json'
 const lock = new Auth0Lock(
   process.env.REACT_APP_AUTH0_KEY,
   'perezvon.auth0.com',
@@ -146,26 +144,7 @@ class App extends React.Component {
 
   componentDidMount = () => {
     if (token && this.state.CustomerGroupID) {
-      const customersUrl = '/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
-      const ordersUrl = '/3dCartWebAPI/v1/Orders?limit=300';
-      const accessToken = process.env.REACT_APP_TOKEN;
-      const privateKey = process.env.REACT_APP_KEY;
-      const options = {
-        "method": "GET",
-        "hostname": "apirest.3dcart.com",
-        "port": null,
-        "path": customersUrl,
-        "headers": {
-          "accept": "application/json",
-          "content-type": "application/json;charset=UTF-8",
-          "secureurl": "https://aspenmills-com.3dcartstores.com",
-          "token": accessToken,
-          "privatekey": privateKey,
-          "cache-control": "no-cache"
-        }
-      }
-      console.log(options)
-      fetch('/api/customergroup', options)
+      fetch('/api/customergroup/' + this.state.CustomerGroupID)
         .then(res => res.json())
         .then(json => {
           let customerIDs = json.map(item => item.CustomerID)
@@ -176,33 +155,16 @@ class App extends React.Component {
           this.setState(getCompanyInfo(this.state.CustomerGroupID))
         })
         .then(() => {
-          options.path = ordersUrl;
-          fetch('/api/orders', options)
+          fetch('/api/orders')
             .then(res => res.json())
             .then(json => {
               let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
               this.setData(orderData)
             })
         })
-        /*.catch(err => {
+        .catch(err => {
           console.log(err)
-          fetch(customerFile)
-            .then(res => res.json())
-            .then(json => {
-              let customerIDs = json.map(item => item.CustomerID)
-              this.setState({
-                customersArray: json,
-                customerIDs: customerIDs
-              });
-              this.setState(getCompanyInfo(this.state.CustomerGroupID))
-            });
-          fetch(orderFile)
-            .then(res => res.json())
-            .then(json => {
-              let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
-              this.setData(orderData)
-            })
-        })*/
+        })
       }
 
 
