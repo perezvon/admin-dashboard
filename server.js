@@ -13,7 +13,7 @@ const app = express()
 const port = process.env.PORT || 3001;
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.resolve(__dirname, '..', 'build')));
+  app.use(express.static('build'));
 }
 
 //support parsing of application/json type post data
@@ -23,11 +23,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static assets
-app.use(express.static(path.resolve(__dirname, '..', 'build')));
+app.use(express.static(path.resolve(__dirname, 'build')));
 
 // Always return the main index.html, so react-router render the route in the client
 app.get('/', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
 });
 
 app.get('/api/customergroup', (req, res) => {
