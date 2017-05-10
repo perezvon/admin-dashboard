@@ -146,31 +146,27 @@ class App extends React.Component {
 
   componentDidMount = () => {
     if (token && this.state.CustomerGroupID) {
-      const customersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
-      const ordersUrl = 'https://apirest.3dcart.com/3dCartWebAPI/v1/Orders?limit=300';
+      const customersUrl = '/3dCartWebAPI/v1/CustomerGroups/' + this.state.CustomerGroupID + '/Customers?limit=300';
+      const ordersUrl = '/3dCartWebAPI/v1/Orders?limit=300';
       const accessToken = process.env.REACT_APP_TOKEN;
       const privateKey = process.env.REACT_APP_KEY;
-      let headers = new Headers();
-      headers.append('Host', 'apirest.3dcart.com');
-      headers.append('Accept', 'application/json');
-      headers.append('Content-Type', 'application/json;charset=UTF-8');
-      headers.append('SecureUrl', 'https://aspenmills-com.3dcartstores.com');
-      headers.append('PrivateKey', privateKey);
-      headers.append('Token', accessToken);
-      headers.append('cache-control', 'no-cache');
-      let myInit = {
-        method: 'GET',
-        credentials: 'include',
-        headers: headers,
-        mode: 'cors'
-      };
-
-      const customerRequest = new Request(customersUrl, myInit);
-      const ordersRequest = new Request(ordersUrl, myInit);
-      fetch(customerRequest)
-        .then(res => {
-          if (res.ok) return res.json();
-        })
+      const options = {
+        "method": "GET",
+        "hostname": "apirest.3dcart.com",
+        "port": null,
+        "path": customersUrl,
+        "headers": {
+          "accept": "application/json",
+          "content-type": "application/json;charset=UTF-8",
+          "secureurl": "https://aspenmills-com.3dcartstores.com",
+          "token": accessToken,
+          "privatekey": privateKey,
+          "cache-control": "no-cache"
+        }
+      }
+      console.log(options)
+      fetch('/api/customergroup', options)
+        .then(res => res.json())
         .then(json => {
           let customerIDs = json.map(item => item.CustomerID)
           this.setState({
@@ -180,14 +176,15 @@ class App extends React.Component {
           this.setState(getCompanyInfo(this.state.CustomerGroupID))
         })
         .then(() => {
-          fetch(ordersRequest)
+          options.path = ordersUrl;
+          fetch('/api/orders', options)
             .then(res => res.json())
             .then(json => {
               let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
               this.setData(orderData)
             })
         })
-        .catch(err => {
+        /*.catch(err => {
           console.log(err)
           fetch(customerFile)
             .then(res => res.json())
@@ -205,7 +202,7 @@ class App extends React.Component {
               let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
               this.setData(orderData)
             })
-        })
+        })*/
       }
 
 
@@ -213,7 +210,6 @@ class App extends React.Component {
 
   render() {
     if (token) {
-      console.log(this.state.CustomerGroupID)
     let data = this.state.data;
     let chartData = []
     let tooltipContent;
