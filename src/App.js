@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import {Dashboard} from './Dashboard'
+import Loading from 'react-loading'
 import _ from 'underscore'
 import Auth0Lock from 'auth0-lock'
 import {sortCollection, getCompanyInfo, getCustomerGroupID} from './global'
@@ -165,6 +166,13 @@ class App extends React.Component {
         .catch(err => {
           console.log(err)
         })
+      } else {
+        fetch('/api/orders')
+          .then(res => res.json())
+          .then(json => {
+            let orderData = json.filter(item => item.OrderStatusID !== 7)
+            this.setData(orderData)
+          })
       }
 
 
@@ -193,7 +201,6 @@ class App extends React.Component {
     let userDetails = [];
 
     if (data && data !== []) {
-
       //populate orders array
       data.forEach(i => {
         let orderNumber = i.InvoiceNumberPrefix + i.InvoiceNumber;
@@ -302,8 +309,6 @@ class App extends React.Component {
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
       modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Shopper Profile for ' + this.state.activeUser;
 
-    }
-
     return (
       <div className='container-fluid'>
         <Dashboard
@@ -329,6 +334,13 @@ class App extends React.Component {
         />
       </div>
     )
+    } else {
+      return (
+        <div className='container-fluid'>
+          <Loading type='cylon'/>
+      </div>
+    )}
+
   } else {
     lock.show()
   }
