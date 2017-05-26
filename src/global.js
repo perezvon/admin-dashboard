@@ -3,6 +3,9 @@ import _ from 'underscore'
 
 export function getCustomerGroupID(username) {
   switch(username) {
+    case 'moorhead':
+      return 1;
+      break;
     default:
       return 0;
   }

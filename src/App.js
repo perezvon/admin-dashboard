@@ -42,8 +42,7 @@ class App extends React.Component {
       showModal: false,
       activeOrder: 0,
       activeUser: '',
-      reverse: true,
-      CustomerGroupID: currentId
+      reverse: true
     };
 }
 
@@ -144,38 +143,18 @@ class App extends React.Component {
   }
 
   componentDidMount = () => {
-    if (token && this.state.CustomerGroupID) {
-      fetch('/api/customergroup/' + this.state.CustomerGroupID)
-        .then(res => res.json())
-        .then(json => {
-          let customerIDs = json.map(item => item.CustomerID)
-          this.setState({
-            customersArray: json,
-            customerIDs: customerIDs
-          });
-          this.setState(getCompanyInfo(this.state.CustomerGroupID))
-        })
-        .then(() => {
+    if (token) {
           fetch('/api/orders')
             .then(res => res.json())
             .then(json => {
-              let orderData = json.filter(item => item.OrderStatusID !== 7).filter(item => this.state.customerIDs.indexOf(item.CustomerID) !== -1)
+              let orderData = json.filter(item => item.OrderStatusID !== 7)
               this.setData(orderData)
+              this.setState(getCompanyInfo(currentId))
             })
-        })
         .catch(err => {
           console.log(err)
         })
-      } else {
-        fetch('/api/orders')
-          .then(res => res.json())
-          .then(json => {
-            let orderData = json.filter(item => item.OrderStatusID !== 7)
-            this.setData(orderData)
-          })
       }
-
-
   }
 
   render() {
@@ -199,7 +178,6 @@ class App extends React.Component {
     let modalData, modalTitle, orderData, userOrderData;
     let userTotals = [];
     let userDetails = [];
-
     if (data && data !== []) {
       //populate orders array
       data.forEach(i => {
@@ -223,11 +201,11 @@ class App extends React.Component {
 
       //get unique users && create dataset for each
       const uniqueUsers = [...new Set(data.map(item => item.CustomerID))];
-
+      console.log(uniqueUsers)
       totalSpendRemaining = this.state.maxSpend * uniqueUsers.length;
 
       uniqueUsers.forEach(user => {
-        let userName = this.state.customersArray.filter(i => i.CustomerID === user).map(i=>i.BillingFirstName + ' ' + i.BillingLastName)[0]
+        let userName = user
         let currentTotal = 0;
         let numOfOrders = 0;
         for (let i = 0; i < data.length; i++) {
