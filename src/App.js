@@ -201,11 +201,11 @@ class App extends React.Component {
 
       //get unique users && create dataset for each
       const uniqueUsers = [...new Set(data.map(item => item.CustomerID))];
-      console.log(uniqueUsers)
       totalSpendRemaining = this.state.maxSpend * uniqueUsers.length;
 
       uniqueUsers.forEach(user => {
-        let userName = user
+        let userName = data.filter(i=>i.CustomerID === user);
+        userName = userName ? userName[0].BillingFirstName + ' ' + userName[0].BillingLastName : ''
         let currentTotal = 0;
         let numOfOrders = 0;
         for (let i = 0; i < data.length; i++) {
