@@ -17,4 +17,15 @@ function getAPIData (options, callback) {
 
   req.end();
 }
-module.exports = {getAPIData};
+
+function getURL (id) {
+  switch(+id){
+    case 1:
+      return 'mhfduniforms-com.3dcartstores.com';
+      break;
+    default:
+      return 'https://aspenmills-com.3dcartstores.com';
+  }
+}
+
+module.exports = {getAPIData, getURL};

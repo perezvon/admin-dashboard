@@ -25,6 +25,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/customergroup/:id', (req, res) => {
+  const url = helpers.getURL(req.params.id);
+  console.log(url);
   var options = {
   "method": "GET",
   "hostname": "apirest.3dcart.com",
@@ -33,7 +35,7 @@ app.get('/api/customergroup/:id', (req, res) => {
   "headers": {
     "accept": "application/json",
     "content-type": "application/json;charset=UTF-8",
-    "secureurl": "https://aspenmills-com.3dcartstores.com",
+    "secureurl": url,
     "token": process.env.REACT_APP_TOKEN,
     "privatekey": process.env.REACT_APP_KEY,
     "cache-control": "no-cache"
@@ -45,7 +47,9 @@ app.get('/api/customergroup/:id', (req, res) => {
   })
 })
 
-app.get('/api/orders', (req, res) => {
+app.get('/api/orders/:id', (req, res) => {
+  console.log(req.params.id)
+  const url = helpers.getURL(req.params.id);
   var options = {
   "method": "GET",
   "hostname": "apirest.3dcart.com",
@@ -54,7 +58,7 @@ app.get('/api/orders', (req, res) => {
   "headers": {
     "accept": "application/json",
     "content-type": "application/json;charset=UTF-8",
-    "secureurl": "https://aspenmills-com.3dcartstores.com",
+    "secureurl": url,
     "token": process.env.REACT_APP_TOKEN,
     "privatekey": process.env.REACT_APP_KEY,
     "cache-control": "no-cache"

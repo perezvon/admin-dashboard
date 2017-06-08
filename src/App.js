@@ -142,12 +142,18 @@ class App extends React.Component {
     this.setState({showModal: false})
   }
 
+  logout = () => {
+    lock.logout();
+  }
+
   componentDidMount = () => {
     if (token) {
-          fetch('/api/orders')
+          fetch('/api/orders/' + currentId)
             .then(res => res.json())
             .then(json => {
-              let orderData = json.filter(item => item.OrderStatusID !== 7)
+              console.log(json)
+              let orderData = json.filter(item => {console.log(item);
+                return item.OrderStatusID !== 7})
               this.setData(orderData)
               this.setState(getCompanyInfo(currentId))
             })
