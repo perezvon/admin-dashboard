@@ -24,14 +24,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
 });
 
-app.get('/api/customergroup/:id', (req, res) => {
+app.get('/api/customers/:id', (req, res) => {
   const url = helpers.getURL(req.params.id);
-  console.log(url);
   var options = {
   "method": "GET",
   "hostname": "apirest.3dcart.com",
   "port": null,
-  "path": "/3dCartWebAPI/v1/CustomerGroups/" + req.params.id + "/Customers?limit=300",
+  "path": "/3dCartWebAPI/v1/Customers?limit=300",
   "headers": {
     "accept": "application/json",
     "content-type": "application/json;charset=UTF-8",
@@ -48,7 +47,6 @@ app.get('/api/customergroup/:id', (req, res) => {
 })
 
 app.get('/api/orders/:id', (req, res) => {
-  console.log(req.params.id)
   const url = helpers.getURL(req.params.id);
   var options = {
   "method": "GET",

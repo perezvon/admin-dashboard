@@ -4,8 +4,9 @@ import {Table} from './Table'
 import {UserSpendChart} from './UserSpendChart'
 import {Logo} from './Logo'
 import {DetailModal} from './DetailModal'
+import {FilterDropdown} from './FilterDropdown'
 
-export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, userHeaders, userSpendData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, modalTitle, modalData, userDetails, showModal, openModal, closeModal}) => (
+export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userData, userHeaders, userSpendData, totalOrders, productsPurchased, chartData, tooltipContent, headers, tableData, modalTitle, modalData, userDetails, showModal, openModal, closeModal, filter, dropdownItems, handleFilter}) => (
       <div>
           <div className='row'>
            <div className='col-md-12'>
@@ -26,6 +27,7 @@ export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userDa
                 <UserSpendChart chartData={chartData} tooltipContent={tooltipContent} />
               </div>
             </div>
+            <FilterDropdown filter={filter} dropdownItems={dropdownItems} handleFilter={handleFilter}/>
             <div className='col-md-6'>
             <Table headers={userHeaders} tableData={userSpendData} />
             </div>

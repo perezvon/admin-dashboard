@@ -26,7 +26,8 @@ export function getCompanyInfo(id) {
       return {
         companyName: 'Moorhead Fire',
         logo: 'moorheadlogo.png',
-        maxSpend: 500
+        maxSpend: 500,
+        filter: 'Shift'
       };
       break;
     case 2:

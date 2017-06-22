@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import {Dashboard} from './Dashboard'
 import Loading from 'react-loading'
+import {MenuItem} from 'react-bootstrap'
 import _ from 'underscore'
 import Auth0Lock from 'auth0-lock'
 import {sortCollection, getCompanyInfo, getCustomerGroupID} from './global'
@@ -39,9 +40,12 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       activeOrder: 0,
       activeUser: '',
+      filter: '',
+      filterBy: 'all',
       reverse: true
     };
 }
@@ -146,26 +150,33 @@ class App extends React.Component {
     lock.logout();
   }
 
+  handleFilter = (eventKey) => {
+    this.setState({filterBy: eventKey})
+  }
+
   componentDidMount = () => {
     if (token) {
           fetch('/api/orders/' + currentId)
             .then(res => res.json())
             .then(json => {
-              console.log(json)
-              let orderData = json.filter(item => {console.log(item);
-                return item.OrderStatusID !== 7})
+              let orderData = json.filter(item => {return item.OrderStatusID !== 7})
               this.setData(orderData)
               this.setState(getCompanyInfo(currentId))
+              this.setState({loading: false})
+
             })
         .catch(err => {
           console.log(err)
         })
       }
+
+      fetch('/api/customers/' + currentId)
+        .then(res => res.json())
+        .then(json => this.setState({customers: json}))
   }
 
   render() {
     if (token) {
-    let data = this.state.data;
     let chartData = []
     let tooltipContent;
     let companyName = this.state.companyName;
@@ -184,7 +195,13 @@ class App extends React.Component {
     let modalData, modalTitle, orderData, userOrderData;
     let userTotals = [];
     let userDetails = [];
-    if (data && data !== []) {
+    let dropdownItems;
+
+    if (!_.isEmpty(this.state.data) && !_.isEmpty(this.state.customers) && this.state.loading === false) {
+      const customers = this.state.filterBy !== 'all' ? this.state.customers.filter(c => c.AdditionalField2 === this.state.filterBy) : this.state.customers;
+      const customerIDs = [...new Set(customers.map(item => item.CustomerID))]
+      console.log(customerIDs)
+      const data = this.state.data.filter(i => customerIDs.indexOf(i.CustomerID) !== -1);
       //populate orders array
       data.forEach(i => {
         let orderNumber = i.InvoiceNumberPrefix + i.InvoiceNumber;
@@ -204,6 +221,10 @@ class App extends React.Component {
           total: total
         })
       });
+
+      //filter menu dropdown items
+      dropdownItems = [...new Set(this.state.customers.map(item => item.AdditionalField2).filter(item => !!item).sort())];
+      dropdownItems = dropdownItems.map((item, index) => <MenuItem key={index} eventKey={item}>{item}</MenuItem>)
 
       //get unique users && create dataset for each
       const uniqueUsers = [...new Set(data.map(item => item.CustomerID))];
@@ -315,13 +336,16 @@ class App extends React.Component {
           showModal={this.state.showModal}
           openModal={this.openModal}
           closeModal={this.closeModal}
+          filter={this.state.filter}
+          dropdownItems={dropdownItems}
+          handleFilter={this.handleFilter}
         />
       </div>
     )
     } else {
       return (
         <div className='container-fluid'>
-          <Loading type='cylon'/>
+            <Loading className='loading' type='cylon' color='#222' width='20vw'/>
       </div>
     )}
 
