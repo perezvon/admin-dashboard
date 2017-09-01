@@ -30,7 +30,7 @@ export const Dashboard = ({logo, companyName, totalSpend, spendRemaining, userDa
                 <UserSpendChart chartData={chartData} tooltipContent={tooltipContent} />
               </div>
             </div>
-            <FilterDropdown filter={filter} dropdownItems={dropdownItems} handleFilter={handleFilter}/>
+            {/*<FilterDropdown filter={filter} dropdownItems={dropdownItems} handleFilter={handleFilter}/>*/}
             <div className='col-md-6'>
             <Table headers={userHeaders} tableData={userSpendData} />
             </div>
