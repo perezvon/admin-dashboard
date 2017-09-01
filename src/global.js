@@ -6,6 +6,9 @@ export function getCustomerGroupID(username) {
     case 'moorhead':
       return 1;
       break;
+    case 'northmemorial':
+      return 2;
+      break;
     default:
       return 0;
   }
@@ -32,9 +35,9 @@ export function getCompanyInfo(id) {
       break;
     case 2:
       return {
-        companyName: 'Awesomeco Inc',
+        companyName: 'North Memorial',
         logo: '',
-        maxSpend: 10000
+        maxSpend: 1000
       }
     default:
       return {

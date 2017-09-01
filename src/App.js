@@ -148,6 +148,8 @@ class App extends React.Component {
 
   logout = () => {
     lock.logout();
+    localStorage.clear();
+    window.history.back();
   }
 
   handleFilter = (eventKey) => {
@@ -159,11 +161,11 @@ class App extends React.Component {
           fetch('/api/orders/' + currentId)
             .then(res => res.json())
             .then(json => {
+              console.log(json)
               let orderData = json.filter(item => {return item.OrderStatusID !== 7})
               this.setData(orderData)
               this.setState(getCompanyInfo(currentId))
               this.setState({loading: false})
-
             })
         .catch(err => {
           console.log(err)
@@ -339,6 +341,7 @@ class App extends React.Component {
           filter={this.state.filter}
           dropdownItems={dropdownItems}
           handleFilter={this.handleFilter}
+          logout={this.logout}
         />
       </div>
     )
