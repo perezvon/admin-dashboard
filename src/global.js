@@ -36,8 +36,9 @@ export function getCompanyInfo(id) {
     case 2:
       return {
         companyName: 'North Memorial',
-        logo: '',
-        maxSpend: 1000
+        logo: 'northmemorial.png',
+        maxSpend: 1000,
+        filter: ''
       }
     default:
       return {
