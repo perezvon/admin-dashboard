@@ -24,7 +24,7 @@ function getURL (id) {
       return 'mhfduniforms-com.3dcartstores.com';
       break;
     case 2:
-      return 'https://717826996775.3dcart.net/';
+      return 'northmemorial-com.3dcartstores.com';
       break;
     default:
       return 'https://aspenmills-com.3dcartstores.com';
