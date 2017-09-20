@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/customers/:id', (req, res) => {
-  const url = helpers.getURL(req.params.id);
+  const url = process.env.API_URL;
   var options = {
   "method": "GET",
   "hostname": "apirest.3dcart.com",
@@ -46,8 +46,8 @@ app.get('/api/customers/:id', (req, res) => {
   })
 })
 
-app.get('/api/orders/:id', (req, res) => {
-  const url = helpers.getURL(req.params.id);
+app.get('/api/orders/', (req, res) => {
+  const url = process.env.API_URL;
   var options = {
   "method": "GET",
   "hostname": "apirest.3dcart.com",

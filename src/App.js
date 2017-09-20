@@ -158,7 +158,7 @@ class App extends React.Component {
 
   componentDidMount = () => {
     if (token) {
-          fetch('/api/orders/' + currentId)
+          fetch('/api/orders/')
             .then(res => res.json())
             .then(json => {
               console.log(json)
