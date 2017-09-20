@@ -181,7 +181,7 @@ class App extends React.Component {
     if (token) {
     let chartData = []
     let tooltipContent;
-    let companyName = this.state.filterBy !=='all' ? this.state.companyName + ' — ' + this.state.filter + ' ' + this.state.filterBy : this.state.companyName + ' — All ' + this.state.filter + 's';
+    let companyName = this.state.filterBy !=='all' ? this.state.companyName + ' — ' + this.state.filter + ' ' + this.state.filterBy : this.state.companyName;
     let companyTotal = 0;
     let totalSpend = '';
     let userData = '';
