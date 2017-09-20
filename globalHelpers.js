@@ -18,4 +18,4 @@ function getAPIData (options, callback) {
   req.end();
 }
 
-module.exports = {getAPIData, getURL};
+module.exports = {getAPIData};
