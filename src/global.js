@@ -9,6 +9,9 @@ export function getCustomerGroupID(username) {
     case 'northmemorial':
       return 2;
       break;
+    case 'healtheast':
+      return 3;
+      break;
     default:
       return 0;
   }
