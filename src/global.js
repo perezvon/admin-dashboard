@@ -39,6 +39,12 @@ export function getCompanyInfo(id) {
         logo: 'northmemorial.png',
         maxSpend: 1000
       }
+      case 3:
+        return {
+          companyName: 'HealthEast',
+          logo: 'healtheast.jpg',
+          maxSpend: 1000
+        }
     default:
       return {
         companyName: '',
