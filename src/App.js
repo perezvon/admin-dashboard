@@ -161,7 +161,6 @@ class App extends React.Component {
           fetch('/api/orders/')
             .then(res => res.json())
             .then(json => {
-              console.log(json)
               let orderData = json.filter(item => {return item.OrderStatusID !== 7})
               this.setData(orderData)
               this.setState(getCompanyInfo(currentId))
@@ -202,7 +201,6 @@ class App extends React.Component {
     if (!_.isEmpty(this.state.data) && !_.isEmpty(this.state.customers) && this.state.loading === false) {
       const customers = this.state.filterBy !== 'all' ? this.state.customers.filter(c => c.AdditionalField2 === this.state.filterBy) : this.state.customers;
       const customerIDs = [...new Set(customers.map(item => item.CustomerID))]
-      console.log(customerIDs)
       const data = this.state.data.filter(i => customerIDs.indexOf(i.CustomerID) !== -1);
       //populate orders array
       data.forEach(i => {
@@ -314,6 +312,7 @@ class App extends React.Component {
       userDetails = _.first(userTotals.filter(item => item.name === this.state.activeUser));
 
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
+      console.log(this.state.activeOrder)
       modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Shopper Profile for ' + this.state.activeUser;
 
     return (

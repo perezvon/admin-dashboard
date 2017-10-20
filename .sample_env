@@ -1,4 +1,7 @@
 REACT_APP_KEY=fakeKey
 REACT_APP_TOKEN=falseToken
 REACT_APP_AUTH0_KEY=invalidKey
+MAIL_USER=mailserviceusername(e.g. postmaster2134@mailgun.com)
+MAIL_PASS=pw
+QM_EMAIL=email
 API_URL=url
