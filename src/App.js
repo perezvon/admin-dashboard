@@ -290,7 +290,8 @@ class App extends React.Component {
       //get data for current order
       if (this.state.activeOrder !== 0) {
         orderData = data.filter(item => {
-          return item.InvoiceNumber === +this.state.activeOrder.slice(3,7);
+          let num = this.state.activeOrder.split('-')
+          return item.InvoiceNumber === +num[1];
         }).map(item => item.OrderItemList)
           orderData = _.flatten(orderData).map((item, index) => {
             //strip html and options from item description
@@ -312,7 +313,6 @@ class App extends React.Component {
       userDetails = _.first(userTotals.filter(item => item.name === this.state.activeUser));
 
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
-      console.log(modalData)
       modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Shopper Profile for ' + this.state.activeUser;
 
     return (
