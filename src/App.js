@@ -312,7 +312,7 @@ class App extends React.Component {
       userDetails = _.first(userTotals.filter(item => item.name === this.state.activeUser));
 
       modalData = this.state.activeOrder !== 0 ? orderData : userOrderData;
-      console.log(this.state.activeOrder)
+      console.log(modalData)
       modalTitle = this.state.activeOrder !== 0 ? 'Order #' + this.state.activeOrder : 'Shopper Profile for ' + this.state.activeUser;
 
     return (
