@@ -46,7 +46,7 @@ export function getCompanyInfo(id) {
         return {
           companyName: 'HealthEast',
           logo: 'healtheast.png',
-          maxSpend: 1000
+          maxSpend: 250
         }
     default:
       return {
